@@ -1,6 +1,9 @@
 mod routes;
+mod models;
 
 #[macro_use] extern crate rocket;
+
+use crate::models::database::Database;
 
 #[get("/")]
 fn index() -> &'static str {
@@ -10,9 +13,11 @@ fn index() -> &'static str {
 #[launch]
 fn rocket() -> _ {
     rocket::build()
+        .manage(Database::new())
         .mount("/", routes![
             index,
-            routes::announce::announce
+            routes::announce::announce,
+            routes::list::list
         ])
 
 }

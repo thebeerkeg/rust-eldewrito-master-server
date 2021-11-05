@@ -1,14 +1,35 @@
-use std::net::IpAddr;
+use std::net::{SocketAddr};
+use rocket::State;
+use crate::models::server::Server;
+use crate::models::database::Database;
+use std::time::SystemTime;
+use rocket::serde::{Serialize, json::Json};
+use crate::models::announce::Announce;
 
-#[derive(FromForm)]
-pub struct Announce {
-    // can be either ipv4 or ipv6
-    ip: IpAddr,
-    port: u16,
+#[derive(Serialize)]
+pub struct Response<'r> {
+    result: Result<'r>
+}
+
+#[derive(Serialize)]
+pub struct Result<'r> {
+    code: u8,
+    msg: &'r str
 }
 
 // announcing servers to the server browser
-#[get("/announce?<announce..>")]
-pub fn announce(announce: Announce) -> String {
-    format!("Announcing server: ( ip: {}, port: {} )", announce.ip.to_string(), announce.port)
+#[get("/announce?<server..>")]
+pub async fn announce(server: Server, db: &State<Database>, remote_addr: SocketAddr) -> Json<Response<'_>> {
+    db.announces.lock().await.push(Announce {
+        server,
+        remote_ip: remote_addr,
+        timestamp: SystemTime::now()
+    });
+
+    Json(Response {
+        result: Result {
+            code: 0,
+            msg: "Added server to list"
+        }
+    })
 }
