@@ -1,15 +1,20 @@
-use rocket::tokio::sync::Mutex;
-use std::sync::Arc;
 use crate::models::announce::Announce;
+use std::sync::Mutex;
 
+#[derive(Debug)]
 pub struct Database {
-    pub announces: Arc<Mutex<Vec<Announce>>>
+    pub announces: Mutex<Vec<Announce>>
 }
 
 impl Database {
     pub fn new() -> Self {
         Database {
-            announces: Arc::new(Mutex::new(Vec::new()))
+            announces: Mutex::new(Vec::new())
         }
+    }
+
+    pub fn add_announce(&self, announce: Announce) -> Result<(), ()> {
+        self.announces.lock().unwrap().push(announce);
+        Ok(())
     }
 }
