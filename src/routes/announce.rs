@@ -1,35 +1,42 @@
-use std::net::{SocketAddr};
-use rocket::State;
-use crate::models::server::Server;
-use crate::models::database::Database;
+use actix_web::{web, get, Responder, HttpRequest, HttpResponse};
 use std::time::SystemTime;
-use rocket::serde::{Serialize, json::Json};
+use::serde::{Serialize};
 use crate::models::announce::Announce;
+use crate::models::database::Database;
+use crate::models::server::Server;
 
 #[derive(Serialize)]
-pub struct Response<'r> {
-    result: Result<'r>
+pub struct Response {
+    result: Result
 }
 
 #[derive(Serialize)]
-pub struct Result<'r> {
+pub struct Result {
     code: u8,
-    msg: &'r str
+    msg: String
 }
 
 // announcing servers to the server browser
-#[get("/announce?<server..>")]
-pub async fn announce(server: Server, db: &State<Database>, remote_addr: SocketAddr) -> Json<Response<'_>> {
-    db.announces.lock().await.push(Announce {
-        server,
-        remote_ip: remote_addr,
+#[get("/announce")]
+pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::Data<Database>) -> impl Responder {
+    let announce_result = &data.add_announce(Announce {
+        server: server.into_inner(),
+        socket_addr: req.peer_addr(),
         timestamp: SystemTime::now()
     });
 
-    Json(Response {
-        result: Result {
+    let result = match announce_result {
+        Ok(_) => Result {
             code: 0,
-            msg: "Added server to list"
+            msg: "OK".to_string()
+        },
+        Err(_) => Result {
+            code: 2,
+            msg: "Server unreachable".to_string()
         }
+    };
+
+    HttpResponse::Ok().json(Response {
+        result
     })
 }
