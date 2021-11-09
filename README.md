@@ -5,7 +5,7 @@ A master server for the Halo Online mod called "ElDewrito", written in Rust.
 
 JMeter Benchmarks: Concurrent requests per second = average latency in miliseconds.
 
-| Requests / second | Rust(ms) | [NodeJS](ms) |
+| Requests / second | Rust(ms) | [NodeJS]\(ms) |
 |------------|------|--------|
 |     1       |   1   |    2   |
 |     10       |   1   |    2    |
