@@ -10,7 +10,7 @@ pub struct Announce {
 }
 
 impl Announce {
-    pub fn as_addr(&self) -> String {
+    pub fn server_addr(&self) -> String {
         let ip = match self.socket_addr {
             None => self.server.ip,
             Some(v) => v.ip()
