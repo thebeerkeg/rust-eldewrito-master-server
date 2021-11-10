@@ -23,7 +23,7 @@ pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::D
         server: server.into_inner(),
         socket_addr: req.peer_addr(),
         timestamp: SystemTime::now()
-    });
+    }).await;
 
     HttpResponse::Ok().json(Response {
         result

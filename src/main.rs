@@ -1,5 +1,6 @@
 mod models;
 mod routes;
+mod utils;
 
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use crate::models::database::Database;

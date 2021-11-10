@@ -3,6 +3,8 @@ use std::sync::Mutex;
 use crate::routes;
 use std::collections::{HashMap};
 use std::time::SystemTime;
+use crate::models::server_info::ServerInfo;
+use crate::utils::http_client;
 
 // is set in the eldewrito client (30 + 2 * 60)
 const ED_SERVER_CONTACT_TIME_LIMIT_SECS: u64 = 150;
@@ -26,7 +28,7 @@ impl Database {
         }
     }
 
-    pub fn handle_announce(&self, announce: Announce) -> routes::announce::Result {
+    pub async fn handle_announce(&self, announce: Announce) -> routes::announce::Result {
         if announce.server.shutdown == Some(true) {
             self.server_list.lock().unwrap().remove(&*announce.server_addr());
             return routes::announce::Result {
@@ -35,7 +37,19 @@ impl Database {
             }
         }
 
-        // todo: checks to verify server is legit
+        // request server info
+        let server_info_result = http_client::get::<ServerInfo>(format!("http://{}/", announce.server_addr())).await;
+
+        if server_info_result.is_err() {
+            return routes::announce::Result {
+                code: 2,
+                msg: "Failed to retrieve server info.".to_string()
+            }
+        }
+
+        // you can do stuff with the server info if you want
+        //let server_info = server_info_result.unwrap();
+
         self.server_list.lock().unwrap().insert(announce.server_addr(), announce.timestamp);
 
         routes::announce::Result {
