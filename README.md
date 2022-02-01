@@ -64,7 +64,7 @@ max_time_without_announce = 30
 update_interval = 10
 
 [ranking_server]
-enabled = false
+enabled = true
 submit_endpoint = "submit"
 stats_endpoint = "stats"
 default_emblem = "http://thebeerkeg.net/img/default.png"
@@ -73,6 +73,7 @@ winning_team_multiplier = 2
 score_multiplier = 10
 kills_multiplier = 1
 assists_multiplier = 0
+max_exp_per_game = 100
 ```
 
 * Run REMS again:
@@ -92,8 +93,8 @@ assists_multiplier = 0
 * Add the following to `"masterServers"`:
 ```json
 {
-    "list": "http://YOUR_IP_OR_DOMAIN:PORT/list"
-    "announce": "http://YOUR_IP_OR_DOMAIN:PORT/announce"
+    "list": "http://YOUR_IP_OR_DOMAIN:PORT/list",
+    "announce": "http://YOUR_IP_OR_DOMAIN:PORT/announce",
     "stats": ""
 }
 ```

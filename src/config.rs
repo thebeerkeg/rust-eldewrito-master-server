@@ -42,7 +42,7 @@ impl RemsConfig {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
             master_server: MasterServer {
-                enabled: false,
+                enabled: true,
                 announce_endpoint: "announce".to_string(),
                 list_endpoint: "list".to_string(),
                 ed_announce_interval: 150,
