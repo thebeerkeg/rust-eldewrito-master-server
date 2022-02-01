@@ -127,9 +127,27 @@ impl Database {
         re_list
     }
 
-    pub async fn insert_game_and_get_id(&self, game_version: &str, server_name: &str, host_player: &str, game: &Game) -> Result<i64, ()> {
-        // todo: insert_team_scores(team_scores: Vec<i64>, game_id: i64)
+    pub async fn insert_team_scores(&self, game_id: i64, scores: &Vec<i64>) -> Result<(), ()> {
+        let _res = sqlx::query!(
+            r#"INSERT INTO game_team_results (game_id, one, two, three, four, five, six, seven, eight)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"#,
+            game_id,
+            scores[0],
+            scores[1],
+            scores[2],
+            scores[3],
+            scores[4],
+            scores[5],
+            scores[6],
+            scores[7]
+        )
+            .execute(&self.pool)
+            .await.map_err(|_| ())?;
 
+        Ok(())
+    }
+
+    pub async fn insert_game_and_get_id(&self, game_version: &str, server_name: &str, host_player: &str, game: &Game) -> Result<i64, ()> {
         let res = sqlx::query!(
             r#"INSERT INTO games (game_version, server_name, host_player, map_name, map_file, variant, variant_type, team_game)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -145,6 +163,10 @@ impl Database {
         )
             .fetch_one(&self.pool)
             .await.map_err(|_| ())?;
+
+        if game.team_game {
+            let _ = self.insert_team_scores(res.game_id, game.team_scores.as_ref().unwrap()).await;
+        }
 
         Ok(res.game_id)
     }

@@ -26,7 +26,7 @@ pub struct Game {
     pub variant: String,
     pub variant_type: String,
     pub team_game: bool,
-    pub team_scores: Vec<i64>,
+    pub team_scores: Option<Vec<i64>>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
