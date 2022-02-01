@@ -248,6 +248,8 @@ impl Database {
             &submit_request.game
         ).await?;
 
+
+        // todo: handle a draw as win, currently one of the drawing teams gets lucky
         let winning_team = if let Some(team_scores) = submit_request.game.team_scores.as_ref() {
             team_scores.iter().enumerate().max_by_key(|(_, &value)| value).map(|(idx, _)| idx).unwrap()
         } else {

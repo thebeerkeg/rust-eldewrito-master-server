@@ -41,7 +41,7 @@ impl RemsConfig {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
             master_server: MasterServer {
-                enabled: true,
+                enabled: false,
                 announce_endpoint: "announce".to_string(),
                 list_endpoint: "list".to_string(),
                 ed_announce_interval: 150,
@@ -49,7 +49,7 @@ impl RemsConfig {
                 update_interval: 10
             },
             ranking_server: RankingServer {
-                enabled: false,
+                enabled: true,
                 submit_endpoint: "submit".to_string(),
                 stats_endpoint: "stats".to_string(),
                 default_emblem: "http://thebeerkeg.net/img/default.png".to_string(),
