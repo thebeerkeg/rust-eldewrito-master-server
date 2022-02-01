@@ -3,6 +3,14 @@
 ## Project Description
 REMS is a Master Server and Ranking Server for the popular Halo Online mod called "ElDewrito", written in Rust.
 
+### Features
+* [X] Master Server
+* [X] Ranking Server
+* [X] Configurable Endpoint Paths (Eg: /stats -> /playerinfo)
+* [ ] Custom Rank & Exp Logic - *todo*
+* [ ] Custom Emblems- *todo*
+* [X] Amazing performance thanks to Rust!
+
 ## How To Install
 ### Install Prerequisites
 * Git: ```sudo apt-get install git```
