@@ -26,8 +26,8 @@ pub struct Result {
 }
 
 // announcing servers to the server browser
-pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::Data<Rems>) -> impl Responder {
-    let result = data.handle_announce(Announce {
+pub async fn announce(server: web::Query<Server>, req: HttpRequest, rems: web::Data<Rems>) -> impl Responder {
+    let result = rems.handle_announce(Announce {
         server: server.into_inner(),
         socket_addr: req.peer_addr(),
         timestamp: SystemTime::now()

@@ -16,8 +16,8 @@ pub struct Result {
 }
 
 // getting servers for server browser
-pub async fn list(data: web::Data<Rems>) -> impl Responder {
-    let result = data.handle_list();
+pub async fn list(rems: web::Data<Rems>) -> impl Responder {
+    let result = rems.handle_list();
 
     HttpResponse::Ok().json(Response {
         result

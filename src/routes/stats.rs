@@ -30,8 +30,8 @@ pub struct PlayerEntry {
 }
 
 // get rank and emblem of players
-pub async fn stats(request: web::Json<StatsRequest>, data: web::Data<Rems>) -> impl Responder {
+pub async fn stats(request: web::Json<StatsRequest>, rems: web::Data<Rems>) -> impl Responder {
     let stats_request = request.into_inner();
-    let re_list = data.handle_stats(&stats_request).await;
+    let re_list = rems.handle_stats(&stats_request).await;
     HttpResponse::Ok().json(re_list)
 }

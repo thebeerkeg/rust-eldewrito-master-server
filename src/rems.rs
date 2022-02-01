@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use crate::{RemsConfig, routes};
 use std::collections::{HashMap};
+use std::net::SocketAddr;
 use std::time::SystemTime;
 use crate::routes::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
@@ -244,7 +245,20 @@ impl Rems {
         ).clamp(0, self.cfg.ranking_server.max_exp_per_game) as u32
     }
 
-    pub async fn handle_submit(&self, submit_request: &SubmitRequest) -> Result<(), ()> {
+    pub async fn handle_submit(&self, submit_request: &SubmitRequest, remote_addr: Option<SocketAddr>) -> Result<(), ()> {
+        // whitelist check
+        if self.cfg.ranking_server.submit_whitelist_enabled {
+            println!("{:?}: submitting stats", remote_addr);
+            match remote_addr {
+                None => { return Err(()) }
+                Some(addr) => {
+                    if !self.cfg.ranking_server.submit_whitelist.contains(&addr.ip()) {
+                        return Err(())
+                    }
+                }
+            }
+        }
+
         let game_id = self.insert_game_and_get_id(
             &submit_request.game_version,
             &submit_request.server_name,

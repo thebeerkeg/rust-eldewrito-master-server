@@ -1,4 +1,4 @@
-use actix_web::{Responder, web, HttpResponse};
+use actix_web::{Responder, web, HttpResponse, HttpRequest};
 use serde::{Serialize, Deserialize};
 use crate::rems::Rems;
 
@@ -98,8 +98,10 @@ pub struct Quitter {
 }
 
 // submit game results
-pub async fn submit(request: web::Json<SubmitRequest>, data: web::Data<Rems>) -> impl Responder {
+pub async fn submit(request: web::Json<SubmitRequest>, req: HttpRequest, rems: web::Data<Rems>) -> impl Responder {
     let submit_request = request.into_inner();
-    let _response = data.handle_submit(&submit_request).await;
-    HttpResponse::Ok()
+    match rems.handle_submit(&submit_request, req.peer_addr()).await {
+        Ok(_) => HttpResponse::Ok(),
+        Err(_) => HttpResponse::Unauthorized()
+    }
 }

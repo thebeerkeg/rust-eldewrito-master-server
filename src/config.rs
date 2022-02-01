@@ -1,5 +1,5 @@
 use std::fs;
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
 use config::{ConfigError, Config, File};
 use std::path::Path;
 use std::str::FromStr;
@@ -20,6 +20,8 @@ pub struct RankingServer {
     pub enabled: bool,
     pub submit_endpoint: String,
     pub stats_endpoint: String,
+    pub submit_whitelist_enabled: bool,
+    pub submit_whitelist: Vec<IpAddr>,
     pub default_emblem: String,
     pub max_rank: u8,
     pub winning_team_multiplier: u8,
@@ -53,6 +55,8 @@ impl RemsConfig {
                 enabled: true,
                 submit_endpoint: "submit".to_string(),
                 stats_endpoint: "stats".to_string(),
+                submit_whitelist_enabled: false,
+                submit_whitelist: vec![IpAddr::from_str("127.0.0.1").unwrap()],
                 default_emblem: "http://thebeerkeg.net/img/default.png".to_string(),
                 max_rank: 37,
                 winning_team_multiplier: 2,
