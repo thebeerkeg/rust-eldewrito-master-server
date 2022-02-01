@@ -7,6 +7,7 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MasterServer {
+    pub enabled: bool,
     pub announce_endpoint: String,
     pub list_endpoint: String,
     pub ed_announce_interval: u16,
@@ -15,7 +16,6 @@ pub struct MasterServer {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RankingServer {
-    // todo: toggle ranking server based on enabled
     pub enabled: bool,
     pub submit_endpoint: String,
     pub stats_endpoint: String,
@@ -36,6 +36,7 @@ impl RemsConfig {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
             master_server: MasterServer {
+                enabled: true,
                 announce_endpoint: "announce".to_string(),
                 list_endpoint: "list".to_string(),
                 ed_announce_interval: 150,
