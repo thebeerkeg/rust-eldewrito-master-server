@@ -1,4 +1,7 @@
+use std::net::SocketAddr;
+use std::time::SystemTime;
 use serde::{Serialize, Deserialize};
+use crate::routes::announce::Server;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,4 +48,22 @@ pub struct Player {
     pub time_spent_alive: i64,
     pub suicides: i64,
     pub best_streak: i64,
+}
+
+#[derive(Debug)]
+pub struct Announce {
+    pub server: Server,
+    pub socket_addr: Option<SocketAddr>,
+    pub timestamp: SystemTime,
+}
+
+impl Announce {
+    pub fn server_addr(&self) -> String {
+        let ip = match self.socket_addr {
+            None => self.server.ip,
+            Some(v) => v.ip()
+        };
+
+        format!("{}:{}", ip, self.server.port)
+    }
 }

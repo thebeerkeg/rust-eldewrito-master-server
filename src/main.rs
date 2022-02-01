@@ -1,9 +1,9 @@
-mod models;
 mod routes;
 mod utils;
 mod rems;
 mod config;
 mod response;
+mod common;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use rems::Rems;

@@ -1,14 +1,13 @@
-use crate::models::announce::Announce;
 use std::sync::Mutex;
 use crate::{RemsConfig, routes};
 use std::collections::{HashMap};
 use std::time::SystemTime;
-use crate::models::server_info::ServerInfo;
 use crate::routes::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
 use sqlx;
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
+use crate::common::{Announce, ServerInfo};
 use crate::response::PlayerInfo;
 use crate::routes::submit::{Game, Player, SubmitRequest};
 

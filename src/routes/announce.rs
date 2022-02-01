@@ -1,9 +1,18 @@
+use std::net::IpAddr;
 use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use std::time::SystemTime;
-use::serde::{Serialize};
-use crate::models::announce::Announce;
+use::serde::{Serialize, Deserialize};
+use crate::common::Announce;
 use crate::rems::Rems;
-use crate::models::server::Server;
+
+#[derive(Deserialize, Debug)]
+pub struct Server {
+    // can be either ipv4 or ipv6
+    pub ip: IpAddr,
+    pub port: u16,
+    // remove server from database
+    pub shutdown: Option<bool>,
+}
 
 #[derive(Serialize)]
 pub struct Response {
