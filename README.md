@@ -3,18 +3,41 @@
 ## Project Description
 REMS is a Master Server and Ranking Server for the popular Halo Online mod called "ElDewrito", written in Rust.
 
-### Installation
+## How To Install
+### Install Prerequisites
+* Git: ```sudo apt-get install git```
+* cURL: ```sudo apt-get install curl```
+* Rust/Cargo:
+    1. ```curl https://sh.rustup.rs -sSf | sh```
+    2. ```1``` Proceed with installation (default)
+    3. ```source $HOME/.cargo/env```
+* Build-tools:
+    * for Arch Linux: ```sudo pacman -S base-devel```
+    * for Debian/Ubuntu: ```sudo apt install build-essential```
+
+### Install REMS
 * Clone the repo.
 ```bash
 git clone https://github.com/thebeerkeg/rust-eldewrito-master-server.git
 cd rust-eldewrito-master-server
 ```
+
+* Install sqlx-cli:
+```bash
+cargo install sqlx-cli
+```
+
+* Run database migrations in sqlx-cli:
+```bash
+sqlx mig run
+```
+
 * Build the source code.
 ```bash
 cargo build --release
 ```
 
-### Usage
+## Usage
 * Run REMS once to create the `config.toml` file:
 ```bash
 ./target/release/rust-eldewrito-master-server
@@ -45,7 +68,7 @@ default_emblem = "http://thebeerkeg.net/img/Default.png"
 ./target/release/rust-eldewrito-master-server
 ```
 
-### Benchmarks
+## Benchmarks
 [NodeJS]: https://github.com/ElDewrito/ElDewrito-MasterServer
 JMeter Benchmarks (empty /list endpoint): Concurrent requests per second = average latency in miliseconds.
 
@@ -61,3 +84,6 @@ JMeter Benchmarks (empty /list endpoint): Concurrent requests per second = avera
 |      10000      |   2   |    1000+ (died on 5000 requests)   |
 
 As you can see here, the Rust based master server performs significantly better than the NodeJS based master server under heavy load. Not that it matters.
+
+## Credits
+🍺
