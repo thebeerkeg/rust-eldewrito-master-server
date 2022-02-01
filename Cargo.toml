@@ -10,3 +10,5 @@ actix-web = { version = "4.0.0-beta.10", features=["rustls"] }
 serde = "1.0.130"
 rustls = "0.20.0"
 reqwest = { version = "0.11.6", features = ["blocking", "json"] }
+config = "0.11"
+sqlx = { version = "0.5.7", features = [ "runtime-actix-rustls", "sqlite", "migrate", "time" ] }

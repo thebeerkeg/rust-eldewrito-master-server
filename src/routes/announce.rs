@@ -2,7 +2,7 @@ use actix_web::{web, get, Responder, HttpRequest, HttpResponse};
 use std::time::SystemTime;
 use::serde::{Serialize};
 use crate::models::announce::Announce;
-use crate::models::database::Database;
+use crate::database::Database;
 use crate::models::server::Server;
 
 #[derive(Serialize)]

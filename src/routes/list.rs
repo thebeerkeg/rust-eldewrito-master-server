@@ -1,5 +1,5 @@
 use actix_web::{Responder, get, web, HttpResponse};
-use crate::models::database::Database;
+use crate::database::Database;
 use std::collections::HashSet;
 use serde::{Serialize};
 
