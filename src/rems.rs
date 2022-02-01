@@ -13,7 +13,7 @@ use crate::response::PlayerInfo;
 use crate::routes::submit::{Game, Player, SubmitRequest};
 
 #[derive(Debug)]
-pub struct Database {
+pub struct Rems {
     cfg: RemsConfig,
     announces: Mutex<Vec<Announce>>,
     server_list: Mutex<HashMap<String, SystemTime>>,
@@ -21,7 +21,7 @@ pub struct Database {
     pool: SqlitePool
 }
 
-impl Database {
+impl Rems {
     pub async fn new(cfg: RemsConfig) -> Self {
         let pool = SqlitePoolOptions::new()
             .connect("sqlite://data.db?mode=rwc")

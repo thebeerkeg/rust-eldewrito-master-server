@@ -1,6 +1,6 @@
 use actix_web::{Responder, web, HttpResponse};
 use serde::{Serialize, Deserialize};
-use crate::database::Database;
+use crate::rems::Rems;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -98,7 +98,7 @@ pub struct Quitter {
 }
 
 // submit game results
-pub async fn submit(request: web::Json<SubmitRequest>, data: web::Data<Database>) -> impl Responder {
+pub async fn submit(request: web::Json<SubmitRequest>, data: web::Data<Rems>) -> impl Responder {
     let submit_request = request.into_inner();
     let _response = data.handle_submit(&submit_request).await;
     HttpResponse::Ok()

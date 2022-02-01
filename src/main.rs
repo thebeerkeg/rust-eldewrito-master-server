@@ -1,12 +1,12 @@
 mod models;
 mod routes;
 mod utils;
-mod database;
+mod rems;
 mod config;
 mod response;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
-use database::Database;
+use rems::Rems;
 use crate::config::RemsConfig;
 
 #[get("/")]
@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
 
     if !(master_server_enabled || ranking_server_enabled) { panic!("Master server and ranking server are disabled.") }
 
-    let db = web::Data::new(Database::new(cfg).await);
+    let db = web::Data::new(Rems::new(cfg).await);
 
     HttpServer::new(move || {
         if master_server_enabled && ranking_server_enabled {

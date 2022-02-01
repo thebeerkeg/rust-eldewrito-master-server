@@ -1,5 +1,5 @@
 use actix_web::{Responder, web, HttpResponse};
-use crate::database::Database;
+use crate::rems::Rems;
 use std::collections::HashSet;
 use serde::{Serialize};
 
@@ -16,7 +16,7 @@ pub struct Result {
 }
 
 // getting servers for server browser
-pub async fn list(data: web::Data<Database>) -> impl Responder {
+pub async fn list(data: web::Data<Rems>) -> impl Responder {
     let result = data.handle_list();
 
     HttpResponse::Ok().json(Response {

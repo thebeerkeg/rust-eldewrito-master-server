@@ -2,7 +2,7 @@ use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use std::time::SystemTime;
 use::serde::{Serialize};
 use crate::models::announce::Announce;
-use crate::database::Database;
+use crate::rems::Rems;
 use crate::models::server::Server;
 
 #[derive(Serialize)]
@@ -17,7 +17,7 @@ pub struct Result {
 }
 
 // announcing servers to the server browser
-pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::Data<Database>) -> impl Responder {
+pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::Data<Rems>) -> impl Responder {
     let result = data.handle_announce(Announce {
         server: server.into_inner(),
         socket_addr: req.peer_addr(),
