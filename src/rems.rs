@@ -13,6 +13,7 @@ use crate::routes::submit::{Game, Player, SubmitRequest};
 #[derive(Debug)]
 pub struct Rems {
     cfg: RemsConfig,
+    #[allow(dead_code)]
     announces: Mutex<Vec<Announce>>,
     server_list: Mutex<HashMap<String, SystemTime>>,
     server_list_last_updated: Mutex<SystemTime>,
