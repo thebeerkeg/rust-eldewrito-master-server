@@ -1,3 +1,0 @@
-[master_server]
-# storage path for uploaded emblem files.
-upload_path = "./uploads"

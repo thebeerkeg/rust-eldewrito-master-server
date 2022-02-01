@@ -102,5 +102,5 @@ pub struct Quitter {
 pub async fn submit(request: web::Json<SubmitRequest>, data: web::Data<Database>) -> impl Responder {
     let submit_request = request.into_inner();
     let _response = data.handle_submit(&submit_request).await;
-    HttpResponse::Ok().json(submit_request)
+    HttpResponse::Ok()
 }

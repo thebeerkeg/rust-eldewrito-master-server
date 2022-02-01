@@ -7,6 +7,7 @@ pub mod response;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use database::Database;
+use crate::config::RemsConfig;
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -15,7 +16,10 @@ async fn index() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let db = web::Data::new(Database::new().await);
+    let cfg = RemsConfig::load_from_file().await.expect("Could not load config.toml: ");
+    let bind_address = cfg.bind_address.clone();
+
+    let db = web::Data::new(Database::new(cfg).await);
 
     HttpServer::new(move || {
         App::new()
@@ -26,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::submit::submit)
             .service(routes::stats::stats)
     })
-        .bind("0.0.0.0:3000")?
+        .bind(bind_address)?
         .run()
         .await
 }

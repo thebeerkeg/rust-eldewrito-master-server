@@ -1,6 +1,6 @@
 use crate::models::announce::Announce;
 use std::sync::Mutex;
-use crate::routes;
+use crate::{RemsConfig, routes};
 use std::collections::{HashMap};
 use std::time::SystemTime;
 use crate::models::server_info::ServerInfo;
@@ -13,20 +13,9 @@ use crate::response::PlayerInfo;
 use crate::routes::submit::{Game, Player, SubmitRequest};
 use crate::utils::rank::calc_rank;
 
-// is set in the eldewrito client (30 + 2 * 60)
-const ED_SERVER_CONTACT_TIME_LIMIT_SECS: u64 = 150;
-
-// update server list on /list request when last updated > x secs
-const SERVER_LIST_UPDATE_INTERVAL_SECS: u64 = 10;
-
-// max eldewrito rank
-const MAX_RANK: u8 = 42;
-
-// default emblem for new players
-const DEFAULT_EMBLEM: &str = "";
-
 #[derive(Debug)]
 pub struct Database {
+    cfg: RemsConfig,
     announces: Mutex<Vec<Announce>>,
     server_list: Mutex<HashMap<String, SystemTime>>,
     server_list_last_updated: Mutex<SystemTime>,
@@ -34,7 +23,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub async fn new() -> Self {
+    pub async fn new(cfg: RemsConfig) -> Self {
         let pool = SqlitePoolOptions::new()
             .connect("sqlite://data.db?mode=rwc")
             .await
@@ -43,6 +32,7 @@ impl Database {
         sqlx::migrate!().run(&pool).await.expect("Could not run database migrations.");
 
         Self {
+            cfg,
             announces: Mutex::new(Vec::new()),
             server_list: Mutex::new(HashMap::new()),
             server_list_last_updated: Mutex::new(SystemTime::now()),
@@ -81,7 +71,7 @@ impl Database {
     }
 
     pub fn handle_list(&self) -> routes::list::Result {
-        if self.server_list_last_updated.lock().unwrap().elapsed().unwrap().as_secs() > SERVER_LIST_UPDATE_INTERVAL_SECS {
+        if self.server_list_last_updated.lock().unwrap().elapsed().unwrap().as_secs() > self.cfg.master_server.update_interval as u64 {
             self.update_server_list();
         }
 
@@ -95,7 +85,7 @@ impl Database {
     fn update_server_list(&self) {
         // server should announce every 150 secs.
         // this removes all servers that haven't been re-announced in 300 secs.
-        self.server_list.lock().unwrap().retain(|_, v| v.elapsed().unwrap().as_secs() < 2 * ED_SERVER_CONTACT_TIME_LIMIT_SECS);
+        self.server_list.lock().unwrap().retain(|_, v| v.elapsed().unwrap().as_secs() < (2 * self.cfg.master_server.ed_announce_interval) as u64);
         *self.server_list_last_updated.lock().unwrap() = SystemTime::now();
     }
 
@@ -123,13 +113,13 @@ impl Database {
 
                 // todo: get emblems from halostats
                 re_list.insert(index.to_string(), PlayerEntry {
-                    r: calc_rank(experience, MAX_RANK),
-                    e: DEFAULT_EMBLEM.to_string()
+                    r: calc_rank(experience, self.cfg.ranking_server.max_rank),
+                    e: self.cfg.ranking_server.default_emblem.to_string()
                 });
             } else {
                 re_list.insert(index.to_string(), PlayerEntry {
                     r: 0,
-                    e: DEFAULT_EMBLEM.to_string()
+                    e: self.cfg.ranking_server.default_emblem.to_string()
                 });
             }
         }
