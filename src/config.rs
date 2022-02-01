@@ -25,7 +25,8 @@ pub struct RankingServer {
     pub winning_team_multiplier: u8,
     pub score_multiplier: u8,
     pub kills_multiplier: u8,
-    pub assists_multiplier: u8
+    pub assists_multiplier: u8,
+    pub max_exp_per_game: u16
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -57,7 +58,8 @@ impl RemsConfig {
                 winning_team_multiplier: 2,
                 score_multiplier: 10,
                 kills_multiplier: 1,
-                assists_multiplier: 0
+                assists_multiplier: 0,
+                max_exp_per_game: 100
             }
         }
     }

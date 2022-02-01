@@ -236,10 +236,11 @@ impl Rems {
 
         // apply exp modifiers
         (
-            (score * self.cfg.ranking_server.score_multiplier as u16) +
+            (score * self.cfg.ranking_server.score_multiplier as u16).clamp(0, 50) +
             (kills * self.cfg.ranking_server.kills_multiplier as u16) +
             (assists * self.cfg.ranking_server.assists_multiplier as u16)
-        ) as u32
+            // some variant types give too much score, so we set a max exp gain
+        ).clamp(0, self.cfg.ranking_server.max_exp_per_game) as u32
     }
 
     pub async fn handle_submit(&self, submit_request: &SubmitRequest) -> Result<(), ()> {
