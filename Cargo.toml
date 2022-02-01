@@ -6,7 +6,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = { version = "4.0.0-beta.10", features=["rustls"] }
+actix-web = { version = "4.0.0-rc.1", features=["rustls"] }
 serde = "1.0.130"
 rustls = "0.20.0"
 reqwest = { version = "0.11.6", features = ["blocking", "json"] }

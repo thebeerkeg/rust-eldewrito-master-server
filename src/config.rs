@@ -7,13 +7,18 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MasterServer {
+    pub announce_endpoint: String,
+    pub list_endpoint: String,
     pub ed_announce_interval: u16,
     pub update_interval: u16
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RankingServer {
+    // todo: toggle ranking server based on enabled
     pub enabled: bool,
+    pub submit_endpoint: String,
+    pub stats_endpoint: String,
     pub max_rank: u8,
     pub default_emblem: String
 }
@@ -31,11 +36,15 @@ impl RemsConfig {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
             master_server: MasterServer {
+                announce_endpoint: "announce".to_string(),
+                list_endpoint: "list".to_string(),
                 ed_announce_interval: 150,
                 update_interval: 10
             },
             ranking_server: RankingServer {
                 enabled: false,
+                submit_endpoint: "submit".to_string(),
+                stats_endpoint: "stats".to_string(),
                 max_rank: 37,
                 default_emblem: "".to_string()
             }

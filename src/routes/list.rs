@@ -1,4 +1,4 @@
-use actix_web::{Responder, get, web, HttpResponse};
+use actix_web::{Responder, web, HttpResponse};
 use crate::database::Database;
 use std::collections::HashSet;
 use serde::{Serialize};
@@ -15,8 +15,7 @@ pub struct Result {
     pub msg: String
 }
 
-// announcing servers to the server browser
-#[get("/list")]
+// getting servers for server browser
 pub async fn list(data: web::Data<Database>) -> impl Responder {
     let result = data.handle_list();
 

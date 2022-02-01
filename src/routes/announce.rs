@@ -1,4 +1,4 @@
-use actix_web::{web, get, Responder, HttpRequest, HttpResponse};
+use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use std::time::SystemTime;
 use::serde::{Serialize};
 use crate::models::announce::Announce;
@@ -17,7 +17,6 @@ pub struct Result {
 }
 
 // announcing servers to the server browser
-#[get("/announce")]
 pub async fn announce(server: web::Query<Server>, req: HttpRequest, data: web::Data<Database>) -> impl Responder {
     let result = data.handle_announce(Announce {
         server: server.into_inner(),

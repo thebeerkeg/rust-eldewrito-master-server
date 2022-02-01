@@ -1,4 +1,4 @@
-use actix_web::{Responder, post, web, HttpResponse};
+use actix_web::{Responder, web, HttpResponse};
 use serde::{Serialize, Deserialize};
 use crate::database::Database;
 
@@ -97,8 +97,7 @@ pub struct Quitter {
     pub name: String,
 }
 
-// announcing servers to the server browser
-#[post("/submit")]
+// submit game results
 pub async fn submit(request: web::Json<SubmitRequest>, data: web::Data<Database>) -> impl Responder {
     let submit_request = request.into_inner();
     let _response = data.handle_submit(&submit_request).await;

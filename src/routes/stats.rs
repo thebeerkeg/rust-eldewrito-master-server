@@ -1,4 +1,4 @@
-use actix_web::{Responder, post, web, HttpResponse};
+use actix_web::{Responder, web, HttpResponse};
 use std::collections::{HashMap};
 use serde::{Serialize, Deserialize};
 use crate::database::Database;
@@ -29,8 +29,7 @@ pub struct PlayerEntry {
     pub e: String,
 }
 
-// announcing servers to the server browser
-#[post("/stats")]
+// get rank and emblem of players
 pub async fn stats(request: web::Json<StatsRequest>, data: web::Data<Database>) -> impl Responder {
     let stats_request = request.into_inner();
     let re_list = data.handle_stats(&stats_request).await;
