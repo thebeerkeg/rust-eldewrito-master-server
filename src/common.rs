@@ -50,6 +50,14 @@ pub struct Player {
     pub best_streak: i64,
 }
 
+#[derive(Serialize, Deserialize, Debug, sqlx::FromRow)]
+pub struct PlayerInfo {
+    pub name: String,
+    pub service_tag: String,
+    pub primary_color: String,
+    pub experience: Option<i64>
+}
+
 #[derive(Debug)]
 pub struct Announce {
     pub server: Server,
