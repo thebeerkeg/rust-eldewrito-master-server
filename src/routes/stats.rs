@@ -6,13 +6,13 @@ use crate::database::Database;
 // key is number in string, eg: "0", "15"
 pub type RankEmblemList = HashMap<String, PlayerEntry>;
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct StatsRequest {
     pub players: Vec<StatsRequestPlayer>
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct StatsRequestPlayer {
     pub name: String,

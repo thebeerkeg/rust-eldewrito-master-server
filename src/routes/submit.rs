@@ -36,8 +36,8 @@ pub struct Player {
     pub client_name: String,
     pub service_tag: String,
     pub ip: String,
-    pub team: i64,
-    pub player_index: i64,
+    pub team: u8,
+    pub player_index: u8,
     pub uid: String,
     pub primary_color: String,
     pub player_game_stats: PlayerGameStats,
@@ -50,21 +50,21 @@ pub struct Player {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerGameStats {
-    pub score: i64,
-    pub kills: i64,
-    pub assists: i64,
-    pub deaths: i64,
-    pub betrayals: i64,
-    pub time_spent_alive: i64,
-    pub suicides: i64,
-    pub best_streak: i64,
+    pub score: u16,
+    pub kills: u16,
+    pub assists: u16,
+    pub deaths: u16,
+    pub betrayals: u16,
+    pub time_spent_alive: u16,
+    pub suicides: u16,
+    pub best_streak: u16,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerMedal {
     pub medal_name: String,
-    pub count: i64,
+    pub count: u16,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

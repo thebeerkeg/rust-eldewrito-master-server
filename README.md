@@ -7,7 +7,7 @@ REMS is a Master Server and Ranking Server for the popular Halo Online mod calle
 * [X] Master Server
 * [X] Ranking Server
 * [X] Configurable Endpoint Paths (Eg: /stats -> /playerinfo)
-* [ ] Custom Rank & Exp Logic - *todo*
+* [X] Custom Rank & Exp Logic
 * [ ] Custom Emblems- *todo*
 * [X] Amazing performance thanks to Rust!
 
@@ -64,11 +64,15 @@ max_time_without_announce = 30
 update_interval = 10
 
 [ranking_server]
-enabled = true
+enabled = false
 submit_endpoint = "submit"
 stats_endpoint = "stats"
+default_emblem = "http://thebeerkeg.net/img/default.png"
 max_rank = 37
-default_emblem = "http://thebeerkeg.net/img/Default.png"
+winning_team_multiplier = 2
+score_multiplier = 10
+kills_multiplier = 1
+assists_multiplier = 0
 ```
 
 * Run the torrust-tracker again:

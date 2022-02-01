@@ -110,7 +110,6 @@ impl Database {
                     0
                 };
 
-                // todo: get emblems from halostats
                 re_list.insert(index.to_string(), PlayerEntry {
                     r: calc_rank(experience, self.cfg.ranking_server.max_rank),
                     e: self.cfg.ranking_server.default_emblem.to_string()
@@ -226,6 +225,21 @@ impl Database {
         Ok(())
     }
 
+    pub fn calc_base_player_exp_from_game_result(&self, player: &Player) -> u32 {
+        let score = player.player_game_stats.score; // objective points
+        let kills = player.player_game_stats.kills;
+        // let deaths = player.player_game_stats.deaths;
+        let assists = player.player_game_stats.assists;
+        // let best_streak = player.player_game_stats.best_streak; // broken stat
+
+        // apply exp modifiers
+        (
+            (score * self.cfg.ranking_server.score_multiplier as u16) +
+            (kills * self.cfg.ranking_server.kills_multiplier as u16) +
+            (assists * self.cfg.ranking_server.assists_multiplier as u16)
+        ) as u32
+    }
+
     pub async fn handle_submit(&self, submit_request: &SubmitRequest) -> Result<(), ()> {
         let game_id = self.insert_game_and_get_id(
             &submit_request.game_version,
@@ -234,9 +248,21 @@ impl Database {
             &submit_request.game
         ).await?;
 
+        let winning_team = if let Some(team_scores) = submit_request.game.team_scores.as_ref() {
+            team_scores.iter().enumerate().max_by_key(|(_, &value)| value).map(|(idx, _)| idx).unwrap()
+        } else {
+            0
+        };
+
         for player in submit_request.players.iter() {
-            // todo: calc experience from game result logic
-            let exp: u32 = 10;
+            let base_exp = self.calc_base_player_exp_from_game_result(player);
+
+            // apply winning team modifier
+            let exp = if player.team as usize == winning_team {
+                base_exp * self.cfg.ranking_server.winning_team_multiplier as u32
+            } else {
+                base_exp
+            };
 
             if self.insert_player_info(player).await.is_ok() {
                 let _ = self.insert_game_player_result(game_id, player, exp).await;
@@ -245,4 +271,34 @@ impl Database {
 
         Ok(())
     }
+
+    // todo: halostats dead, fix when halostats alive again
+    // EXPECTS RESPONSE:
+    //
+    // {
+    //     "0": {
+    //         "r": 3,
+    //         "e": ""
+    //     },
+    //     "1": {
+    //         "r": 0,
+    //         "e": ""
+    //     },
+    //     ...
+    // }
+    // pub async fn get_stats_from_endpoint(&self, stats_request: &StatsRequest) -> Result<Vec<PlayerEntry>, ()> {
+    //     let client = reqwest::Client::new();
+    //     let res = client.post("http://halostats.click/api/playersinfo")
+    //         .header(CONTENT_TYPE, "application/json")
+    //         .header(USER_AGENT, "Eldewrito/0.6.1")
+    //         .json(stats_request)
+    //         .send().await;
+    //
+    //     match res {
+    //         Ok(o) => { println!("{:?}", o) }
+    //         Err(e) => { println!("{:?}", e) }
+    //     }
+    //
+    //     Ok(())
+    // }
 }

@@ -20,8 +20,12 @@ pub struct RankingServer {
     pub enabled: bool,
     pub submit_endpoint: String,
     pub stats_endpoint: String,
+    pub default_emblem: String,
     pub max_rank: u8,
-    pub default_emblem: String
+    pub winning_team_multiplier: u8,
+    pub score_multiplier: u8,
+    pub kills_multiplier: u8,
+    pub assists_multiplier: u8
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -48,8 +52,12 @@ impl RemsConfig {
                 enabled: false,
                 submit_endpoint: "submit".to_string(),
                 stats_endpoint: "stats".to_string(),
+                default_emblem: "http://thebeerkeg.net/img/default.png".to_string(),
                 max_rank: 37,
-                default_emblem: "".to_string()
+                winning_team_multiplier: 2,
+                score_multiplier: 10,
+                kills_multiplier: 1,
+                assists_multiplier: 0
             }
         }
     }
