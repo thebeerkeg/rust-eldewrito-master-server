@@ -11,7 +11,6 @@ use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 use crate::response::PlayerInfo;
 use crate::routes::submit::{Game, Player, SubmitRequest};
-use crate::utils::rank::calc_rank;
 
 #[derive(Debug)]
 pub struct Database {
@@ -39,6 +38,11 @@ impl Database {
             pool
         }
     }
+
+    pub fn calc_rank_from_exp(&self, experience: u32) -> u8 {
+        (8.70 * (0.009 * (experience as f64) + 1.3).ln() - 2.35).floor().clamp(0.0, self.cfg.ranking_server.max_rank as f64) as u8
+    }
+
 
     pub async fn handle_announce(&self, announce: Announce) -> routes::announce::Result {
         if announce.server.shutdown == Some(true) {
@@ -111,7 +115,7 @@ impl Database {
                 };
 
                 re_list.insert(index.to_string(), PlayerEntry {
-                    r: calc_rank(experience, self.cfg.ranking_server.max_rank),
+                    r: self.calc_rank_from_exp(experience),
                     e: self.cfg.ranking_server.default_emblem.to_string()
                 });
             } else {
