@@ -16,3 +16,6 @@ Cargo.lock
 /.idea/
 
 config.toml
+/data.db
+/data.db-shm
+/data.db-wal

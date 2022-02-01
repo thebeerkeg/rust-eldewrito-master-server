@@ -60,7 +60,7 @@ impl Database {
         }
 
         // you can do stuff with the server info if you want
-        //let server_info = server_info_result.unwrap();
+        // let server_info = server_info_result.unwrap();
 
         self.server_list.lock().unwrap().insert(announce.server_addr(), announce.timestamp);
 
@@ -83,9 +83,8 @@ impl Database {
     }
 
     fn update_server_list(&self) {
-        // server should announce every 150 secs.
-        // this removes all servers that haven't been re-announced in 300 secs.
-        self.server_list.lock().unwrap().retain(|_, v| v.elapsed().unwrap().as_secs() < (2 * self.cfg.master_server.ed_announce_interval) as u64);
+        // this removes all servers that haven't been re-announced in time
+        self.server_list.lock().unwrap().retain(|_, v| v.elapsed().unwrap().as_secs() < (self.cfg.master_server.ed_announce_interval + self.cfg.master_server.max_time_without_announce) as u64);
         *self.server_list_last_updated.lock().unwrap() = SystemTime::now();
     }
 

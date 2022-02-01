@@ -11,6 +11,7 @@ pub struct MasterServer {
     pub announce_endpoint: String,
     pub list_endpoint: String,
     pub ed_announce_interval: u16,
+    pub max_time_without_announce: u16,
     pub update_interval: u16
 }
 
@@ -40,6 +41,7 @@ impl RemsConfig {
                 announce_endpoint: "announce".to_string(),
                 list_endpoint: "list".to_string(),
                 ed_announce_interval: 150,
+                max_time_without_announce: 30,
                 update_interval: 10
             },
             ranking_server: RankingServer {
