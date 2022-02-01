@@ -75,9 +75,27 @@ kills_multiplier = 1
 assists_multiplier = 0
 ```
 
-* Run the torrust-tracker again:
+* Run REMS again:
 ```bash
 ./target/release/rust-eldewrito-master-server
+```
+
+### Update Your Eldewrito Server
+* Open the mods directory of your Eldewrito install.
+* Open the `dewrito.json` file.
+
+*Ranking Server*:
+* Add `http://YOUR_IP_OR_DOMAIN:PORT/submit` to `"stats"."submitUrls"`
+* Change `"stats"."playerInfo"` to `http://YOUR_IP_OR_DOMAIN:PORT/stats`
+
+*Master Server*:
+* Add the following to `"masterServers"`:
+```json
+{
+    "list": "http://YOUR_IP_OR_DOMAIN:PORT/list"
+    "announce": "http://YOUR_IP_OR_DOMAIN:PORT/announce"
+    "stats": ""
+}
 ```
 
 ## Benchmarks
