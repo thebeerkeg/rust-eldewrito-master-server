@@ -30,6 +30,8 @@ async fn main() -> std::io::Result<()> {
 
     let db = web::Data::new(Rems::new(cfg).await);
 
+    println!("Started REMS on: {}", bind_address);
+
     HttpServer::new(move || {
         if master_server_enabled && ranking_server_enabled {
             App::new()
