@@ -61,8 +61,6 @@ impl Rems {
 
         let server_address = format!("{}:{}", ip, announce_request.port);
 
-        println!("{}", server_address);
-
         if announce_request.shutdown == Some(true) {
             self.server_list.lock().unwrap().remove(&server_address);
             return Err("Removed server from list.".to_string())
@@ -264,6 +262,7 @@ impl Rems {
             }
         }
 
+        // todo: add server ip + port
         let game_id = self.insert_game_and_get_id(
             &submit_request.game_version,
             &submit_request.server_name,
