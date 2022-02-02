@@ -6,6 +6,7 @@ REMS is a Master Server and Ranking Server for the popular Halo Online mod calle
 ### Features
 * [X] Master Server
 * [X] Ranking Server
+* [X] Works behind reverse proxy
 * [X] Configurable Endpoint Paths (Eg: /stats -> /playerinfo)
 * [X] Custom Rank & Exp Logic
 * [ ] Custom Emblems- *todo*
