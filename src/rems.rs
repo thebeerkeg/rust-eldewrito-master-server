@@ -1,21 +1,20 @@
 use std::sync::Mutex;
 use crate::{RemsConfig, routes};
 use std::collections::{HashMap};
-use std::net::SocketAddr;
+use std::net::{IpAddr};
 use std::time::SystemTime;
 use crate::routes::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
 use sqlx;
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
-use crate::common::{Announce, PlayerInfo, ServerInfo};
+use crate::common::{IpWrapper, PlayerInfo, ServerInfo};
+use crate::routes::announce::{AnnounceRequest};
 use crate::routes::submit::{Game, Player, SubmitRequest};
 
 #[derive(Debug)]
 pub struct Rems {
     cfg: RemsConfig,
-    #[allow(dead_code)]
-    announces: Mutex<Vec<Announce>>,
     server_list: Mutex<HashMap<String, SystemTime>>,
     server_list_last_updated: Mutex<SystemTime>,
     pool: SqlitePool
@@ -32,7 +31,6 @@ impl Rems {
 
         Self {
             cfg,
-            announces: Mutex::new(Vec::new()),
             server_list: Mutex::new(HashMap::new()),
             server_list_last_updated: Mutex::new(SystemTime::now()),
             pool
@@ -43,35 +41,46 @@ impl Rems {
         (8.70 * (0.009 * (experience as f64) + 1.3).ln() - 2.35).floor().clamp(0.0, self.cfg.ranking_server.max_rank as f64) as u8
     }
 
+    // will return forwarded ip if running behind reserve proxy
+    pub fn get_real_ip(&self, ip_wrapper: &IpWrapper) -> Result<IpAddr, String> {
+        if self.cfg.on_reverse_proxy && ip_wrapper.forwarded_opt_ip.is_none() {
+            return Err("Reverse proxy did not forward ip.".to_string())
+        } else if ip_wrapper.real_opt_ip.is_none() {
+            return Err("Could not get ip of server.".to_string())
+        }
 
-    pub async fn handle_announce(&self, announce: Announce) -> routes::announce::Result {
-        if announce.server.shutdown == Some(true) {
-            self.server_list.lock().unwrap().remove(&*announce.server_addr());
-            return routes::announce::Result {
-                code: 0,
-                msg: "Removed server from list.".to_string()
-            }
+        // can not fail because of prior verifications
+        match self.cfg.on_reverse_proxy {
+            true => Ok(ip_wrapper.forwarded_opt_ip.unwrap()),
+            false => Ok(ip_wrapper.real_opt_ip.unwrap())
+        }
+    }
+
+    pub async fn handle_announce(&self, announce_request: &AnnounceRequest, ip_wrapper: &IpWrapper) -> Result<(), String> {
+        let ip = self.get_real_ip(ip_wrapper)?;
+
+        let server_address = format!("{}:{}", ip, announce_request.port);
+
+        println!("{}", server_address);
+
+        if announce_request.shutdown == Some(true) {
+            self.server_list.lock().unwrap().remove(&server_address);
+            return Err("Removed server from list.".to_string())
         }
 
         // request server info
-        let server_info_result = http_client::get::<ServerInfo>(format!("http://{}/", announce.server_addr())).await;
+        let server_info_result = http_client::get::<ServerInfo>(format!("http://{}/", server_address)).await;
 
         if server_info_result.is_err() {
-            return routes::announce::Result {
-                code: 2,
-                msg: "Failed to retrieve server info.".to_string()
-            }
+            return Err("Failed to retrieve server info.".to_string())
         }
 
         // you can do stuff with the server info if you want
         // let server_info = server_info_result.unwrap();
 
-        self.server_list.lock().unwrap().insert(announce.server_addr(), announce.timestamp);
+        self.server_list.lock().unwrap().insert(server_address, SystemTime::now());
 
-        routes::announce::Result {
-            code: 0,
-            msg: "OK".to_string()
-        }
+        Ok(())
     }
 
     pub fn handle_list(&self) -> routes::list::Result {
@@ -245,17 +254,13 @@ impl Rems {
         ).clamp(0, self.cfg.ranking_server.max_exp_per_game) as u32
     }
 
-    pub async fn handle_submit(&self, submit_request: &SubmitRequest, remote_addr: Option<SocketAddr>) -> Result<(), ()> {
+    pub async fn handle_submit(&self, submit_request: &SubmitRequest, ip_wrapper: &IpWrapper) -> Result<(), String> {
+        let ip = self.get_real_ip(ip_wrapper)?;
+
         // whitelist check
         if self.cfg.ranking_server.submit_whitelist_enabled {
-            println!("{:?}: submitting stats", remote_addr);
-            match remote_addr {
-                None => { return Err(()) }
-                Some(addr) => {
-                    if !self.cfg.ranking_server.submit_whitelist.contains(&addr.ip()) {
-                        return Err(())
-                    }
-                }
+            if !self.cfg.ranking_server.submit_whitelist.contains(&ip) {
+                return Err("Ip not whitelisted.".to_string())
             }
         }
 
@@ -264,8 +269,7 @@ impl Rems {
             &submit_request.server_name,
             &submit_request.host_player,
             &submit_request.game
-        ).await?;
-
+        ).await.map_err(|_| "Internal server error.".to_string())?;
 
         // todo: handle a draw as win, currently one of the drawing teams gets lucky
         let winning_team = if let Some(team_scores) = submit_request.game.team_scores.as_ref() {

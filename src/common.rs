@@ -1,7 +1,7 @@
-use std::net::SocketAddr;
-use std::time::SystemTime;
+use std::net::{IpAddr};
+use std::str::FromStr;
+use actix_web::HttpRequest;
 use serde::{Serialize, Deserialize};
-use crate::routes::announce::Server;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -58,20 +58,30 @@ pub struct PlayerInfo {
     pub experience: Option<i64>
 }
 
-#[derive(Debug)]
-pub struct Announce {
-    pub server: Server,
-    pub socket_addr: Option<SocketAddr>,
-    pub timestamp: SystemTime,
+pub struct IpWrapper {
+    pub forwarded_opt_ip: Option<IpAddr>,
+    pub real_opt_ip: Option<IpAddr>
 }
 
-impl Announce {
-    pub fn server_addr(&self) -> String {
-        let ip = match self.socket_addr {
-            None => self.server.ip,
-            Some(v) => v.ip()
+impl IpWrapper {
+    pub fn from_req(req: &HttpRequest) -> Self {
+        let forwarded_opt_ip_string = req.connection_info().realip_remote_addr().map(|s| s.to_string());
+
+        let forwarded_opt_ip = if let Some(ip) = forwarded_opt_ip_string {
+            IpAddr::from_str(&ip).ok()
+        } else {
+            None
         };
 
-        format!("{}:{}", ip, self.server.port)
+        let real_opt_ip = if let Some(socket) = req.peer_addr() {
+            Some(socket.ip())
+        } else {
+            None
+        };
+
+        Self {
+            forwarded_opt_ip,
+            real_opt_ip
+        }
     }
 }

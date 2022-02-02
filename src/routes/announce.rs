@@ -1,13 +1,12 @@
-use std::net::IpAddr;
+use std::net::{IpAddr};
 use actix_web::{web, Responder, HttpRequest, HttpResponse};
-use std::time::SystemTime;
 use::serde::{Serialize, Deserialize};
-use crate::common::Announce;
+use crate::common::{IpWrapper};
 use crate::rems::Rems;
 
 #[derive(Deserialize, Debug)]
-pub struct Server {
-    // can be either ipv4 or ipv6
+pub struct AnnounceRequest {
+    // should be ignored for security reasons
     pub ip: IpAddr,
     pub port: u16,
     // remove server from database
@@ -26,14 +25,19 @@ pub struct Result {
 }
 
 // announcing servers to the server browser
-pub async fn announce(server: web::Query<Server>, req: HttpRequest, rems: web::Data<Rems>) -> impl Responder {
-    let result = rems.handle_announce(Announce {
-        server: server.into_inner(),
-        socket_addr: req.peer_addr(),
-        timestamp: SystemTime::now()
-    }).await;
-
-    HttpResponse::Ok().json(Response {
-        result
-    })
+pub async fn announce(request: web::Query<AnnounceRequest>, req: HttpRequest, rems: web::Data<Rems>) -> impl Responder {
+    let announce_request = request.into_inner();
+    let ip_wrapper = IpWrapper::from_req(&req);
+    match rems.handle_announce(&announce_request, &ip_wrapper).await {
+        Ok(_) => {
+            HttpResponse::Ok().json(Response {
+                result: Result { code: 0, msg: "Server added to list.".to_string() }
+            })
+        }
+        Err(e) => {
+            HttpResponse::Ok().json(Response {
+                result: Result { code: 0, msg: e }
+            })
+        }
+    }
 }

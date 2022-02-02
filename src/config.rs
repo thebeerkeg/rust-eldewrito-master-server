@@ -34,6 +34,7 @@ pub struct RankingServer {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RemsConfig {
     pub bind_address: SocketAddr,
+    pub on_reverse_proxy: bool,
     pub master_server: MasterServer,
     pub ranking_server: RankingServer
 }
@@ -43,6 +44,7 @@ impl RemsConfig {
     pub fn default() -> Self {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
+            on_reverse_proxy: false,
             master_server: MasterServer {
                 enabled: true,
                 announce_endpoint: "announce".to_string(),
