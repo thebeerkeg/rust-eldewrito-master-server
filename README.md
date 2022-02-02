@@ -54,6 +54,7 @@ cargo build --release
 * Edit the newly created config.toml file according to your liking. Eg:
 ```toml
 bind_address = "0.0.0.0:3000"
+on_reverse_proxy = true
 
 [master_server]
 enabled = true
