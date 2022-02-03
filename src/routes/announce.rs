@@ -7,7 +7,7 @@ use crate::rems::Rems;
 #[derive(Deserialize, Debug)]
 pub struct AnnounceRequest {
     // should be ignored for security reasons
-    pub ip: IpAddr,
+    // pub ip: IpAddr,
     pub port: u16,
     // remove server from database
     pub shutdown: Option<bool>,
