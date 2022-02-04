@@ -1,8 +1,9 @@
-mod routes;
 mod utils;
 mod rems;
 mod config;
 mod common;
+mod ranking_server;
+mod master_server;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use rems::Rems;
@@ -35,24 +36,24 @@ async fn main() -> std::io::Result<()> {
         if master_server_enabled && ranking_server_enabled {
             App::new()
                 .app_data(db.clone())
-                .service(web::resource(&announce_endpoint).route(web::get().to(routes::announce::announce)))
-                .service(web::resource(&list_endpoint).route(web::get().to(routes::list::list)))
-                .service(web::resource(&submit_endpoint).route(web::post().to(routes::submit::submit)))
-                .service(web::resource(&stats_endpoint).route(web::post().to(routes::stats::stats)))
+                .service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
+                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)))
+                .service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
+                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)))
                 .service(index)
         } else if master_server_enabled {
             // just the master server
             App::new()
                 .app_data(db.clone())
-                .service(web::resource(&announce_endpoint).route(web::get().to(routes::announce::announce)))
-                .service(web::resource(&list_endpoint).route(web::get().to(routes::list::list)))
+                .service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
+                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)))
                 .service(index)
         } else {
             // just the ranking server
             App::new()
                 .app_data(db.clone())
-                .service(web::resource(&submit_endpoint).route(web::post().to(routes::submit::submit)))
-                .service(web::resource(&stats_endpoint).route(web::post().to(routes::stats::stats)))
+                .service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
+                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)))
                 .service(index)
         }
     })

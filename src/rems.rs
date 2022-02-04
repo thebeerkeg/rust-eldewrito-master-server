@@ -1,16 +1,16 @@
 use std::sync::Mutex;
-use crate::{RemsConfig, routes};
-use std::collections::{HashMap};
-use std::net::{IpAddr};
+use crate::{master_server, RemsConfig};
+use std::collections::HashMap;
+use std::net::IpAddr;
 use std::time::SystemTime;
-use crate::routes::stats::{PlayerEntry, RankEmblemList, StatsRequest};
+use crate::ranking_server::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
 use sqlx;
 use sqlx::SqlitePool;
 use sqlx::sqlite::SqlitePoolOptions;
 use crate::common::{IpWrapper, PlayerInfo, ServerInfo};
-use crate::routes::announce::{AnnounceRequest};
-use crate::routes::submit::{Game, Player, SubmitRequest};
+use crate::master_server::announce::AnnounceRequest;
+use crate::ranking_server::submit::{Game, Player, SubmitRequest};
 
 #[derive(Debug)]
 pub struct Rems {
@@ -56,14 +56,14 @@ impl Rems {
         }
     }
 
-    pub async fn handle_announce(&self, announce_request: &AnnounceRequest, ip_wrapper: &IpWrapper) -> Result<(), String> {
+    pub async fn handle_announce(&self, announce_request: &AnnounceRequest, ip_wrapper: &IpWrapper) -> Result<String, String> {
         let ip = self.get_real_ip(ip_wrapper)?;
 
         let server_address = format!("{}:{}", ip, announce_request.port);
 
         if announce_request.shutdown == Some(true) {
             self.server_list.lock().unwrap().remove(&server_address);
-            return Err("Removed server from list.".to_string())
+            return Ok("Removed server from list.".to_string())
         }
 
         // request server info
@@ -78,15 +78,15 @@ impl Rems {
 
         self.server_list.lock().unwrap().insert(server_address, SystemTime::now());
 
-        Ok(())
+        Ok("Server has been added.".to_string())
     }
 
-    pub fn handle_list(&self) -> routes::list::Result {
+    pub fn handle_list(&self) -> master_server::list::Result {
         if self.server_list_last_updated.lock().unwrap().elapsed().unwrap().as_secs() > self.cfg.master_server.update_interval as u64 {
             self.update_server_list();
         }
 
-        routes::list::Result {
+        master_server::list::Result {
             code: 0,
             servers: self.server_list.lock().unwrap().keys().cloned().collect(),
             msg: "OK".to_string()
@@ -237,14 +237,16 @@ impl Rems {
     }
 
     pub fn calc_base_player_exp_from_game_result(&self, player: &Player) -> u32 {
-        let score = player.player_game_stats.score; // objective points
-        let kills = player.player_game_stats.kills;
+        let score = player.player_game_stats.score.clamp(0, u16::MAX as i32) as u16; // objective points
+        let kills = player.player_game_stats.kills.clamp(0, u16::MAX as i32) as u16;
         // let deaths = player.player_game_stats.deaths;
         let assists = player.player_game_stats.assists;
         // let best_streak = player.player_game_stats.best_streak; // broken stat
 
         // apply exp modifiers
         (
+            // todo: add variant specific score to exp matcher
+            // some variants give too much score
             (score * self.cfg.ranking_server.score_multiplier as u16).clamp(0, 50) +
             (kills * self.cfg.ranking_server.kills_multiplier as u16) +
             (assists * self.cfg.ranking_server.assists_multiplier as u16)

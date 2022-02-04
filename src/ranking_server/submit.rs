@@ -51,8 +51,9 @@ pub struct Player {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerGameStats {
-    pub score: u16,
-    pub kills: u16,
+    // score and kills can be negative
+    pub score: i32,
+    pub kills: i32,
     pub assists: u16,
     pub deaths: u16,
     pub betrayals: u16,

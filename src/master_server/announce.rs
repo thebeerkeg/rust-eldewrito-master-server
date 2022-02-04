@@ -1,4 +1,3 @@
-use std::net::{IpAddr};
 use actix_web::{web, Responder, HttpRequest, HttpResponse};
 use::serde::{Serialize, Deserialize};
 use crate::common::{IpWrapper};
@@ -29,14 +28,14 @@ pub async fn announce(request: web::Query<AnnounceRequest>, req: HttpRequest, re
     let announce_request = request.into_inner();
     let ip_wrapper = IpWrapper::from_req(&req);
     match rems.handle_announce(&announce_request, &ip_wrapper).await {
-        Ok(_) => {
+        Ok(v) => {
             HttpResponse::Ok().json(Response {
-                result: Result { code: 0, msg: "Server added to list.".to_string() }
+                result: Result { code: 0, msg: v }
             })
         }
         Err(e) => {
             HttpResponse::Ok().json(Response {
-                result: Result { code: 0, msg: e }
+                result: Result { code: 1, msg: e }
             })
         }
     }
