@@ -4,6 +4,7 @@ mod config;
 mod common;
 mod ranking_server;
 mod master_server;
+mod torrent_tracker;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use rems::Rems;
@@ -33,29 +34,19 @@ async fn main() -> std::io::Result<()> {
     println!("Started REMS on: {}", bind_address);
 
     HttpServer::new(move || {
-        if master_server_enabled && ranking_server_enabled {
-            App::new()
-                .app_data(db.clone())
-                .service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
-                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)))
-                .service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
-                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)))
-                .service(index)
-        } else if master_server_enabled {
-            // just the master server
-            App::new()
-                .app_data(db.clone())
-                .service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
-                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)))
-                .service(index)
-        } else {
-            // just the ranking server
-            App::new()
-                .app_data(db.clone())
-                .service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
-                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)))
-                .service(index)
+        let mut app = App::new().app_data(db.clone());
+
+        if master_server_enabled {
+            app = app.service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
+                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)));
         }
+
+        if ranking_server_enabled {
+            app = app.service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
+                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)));
+        }
+
+        app.service(index)
     })
         .bind(bind_address)?
         .run()
