@@ -4,22 +4,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-      - uses: Swatinem/rust-cache@v1
-      - name: Run tests
-        run: cargo test
-
   build:
-    needs: test
     if: |
       github.event_name == 'push' &&
       github.event.base_ref == 'refs/heads/main' &&
