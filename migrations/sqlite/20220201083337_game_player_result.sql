@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS game_player_results (
     suicides INTEGER NOT NULL,
     best_streak INTEGER NOT NULL,
     exp INTEGER NOT NULL DEFAULT 0,
+    updated DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(game_id) REFERENCES games(id),
     FOREIGN KEY(uid) REFERENCES players(uid) ON UPDATE CASCADE
 )

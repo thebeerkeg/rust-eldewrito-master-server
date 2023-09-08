@@ -32,8 +32,16 @@ pub struct RankingServer {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum DbDriver {
+    SQLite,
+    MySQL,
+    Unknown
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RemsConfig {
     pub bind_address: SocketAddr,
+    pub db_url: String,
     pub on_reverse_proxy: bool,
     pub master_server: MasterServer,
     pub ranking_server: RankingServer
@@ -44,6 +52,7 @@ impl RemsConfig {
     pub fn default() -> Self {
         RemsConfig {
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
+            db_url: "sqlite://data.db?mode=rwc".to_string(),
             on_reverse_proxy: false,
             master_server: MasterServer {
                 enabled: true,
@@ -92,5 +101,13 @@ impl RemsConfig {
         let toml_string = toml::to_string(self).expect("Could not encode TOML value");
         fs::write("config.toml", toml_string).expect("Could not write to file!");
         Ok(())
+    }
+
+    pub fn get_db_driver(&self) -> DbDriver {
+        match &self.db_url.to_lowercase() {
+            s if s.contains("mysql") => DbDriver::MySQL,
+            s if s.contains("sqlite") => DbDriver::SQLite,
+            _ => DbDriver::Unknown,
+        }
     }
 }

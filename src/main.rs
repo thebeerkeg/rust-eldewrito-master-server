@@ -1,14 +1,7 @@
-mod utils;
-mod rems;
-mod config;
-mod common;
-mod ranking_server;
-mod master_server;
-
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
-use rems::Rems;
-
-use crate::config::RemsConfig;
+use rust_eldewrito_master_server::config::RemsConfig;
+use rust_eldewrito_master_server::{master_server, ranking_server};
+use rust_eldewrito_master_server::rems::Rems;
 
 #[get("/")]
 async fn index() -> impl Responder {

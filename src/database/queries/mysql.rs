@@ -1,0 +1,6 @@
+pub const GET_PLAYER_INFO: &'static str = r#"INSERT INTO games (game_version, server_name, server_ip, server_port, host_player, map_name, map_file, variant, variant_type, team_game) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id as "game_id: i64""#;
+pub const INSERT_TEAM_SCORES: &'static str = r#"INSERT INTO game_team_results (game_id, one, two, three, four, five, six, seven, eight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"#;
+pub const INSERT_GAME_AND_GET_ID: &'static str = r#"INSERT INTO games (game_version, server_name, server_ip, server_port, host_player, map_name, map_file, variant, variant_type, team_game) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id as "game_id: i64""#;
+pub const INSERT_PLAYER: &'static str = r#"INSERT OR IGNORE INTO players (uid) VALUES ($1)"#;
+pub const INSERT_PLAYER_INFO: &'static str = r#"INSERT INTO player_infos (uid, ip, client_name, name, service_tag, primary_color) VALUES ($1, $2, $3, $4, $5, $6)"#;
+pub const INSERT_GAME_PLAYER_RESULT: &'static str = r#"INSERT INTO game_player_results (game_id, uid, team, player_index, score, kills, assists, deaths, betrayals, time_spent_alive, suicides, best_streak, exp) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"#;

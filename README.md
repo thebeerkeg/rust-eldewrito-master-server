@@ -31,16 +31,6 @@ git clone https://github.com/thebeerkeg/rust-eldewrito-master-server.git
 cd rust-eldewrito-master-server
 ```
 
-* Install sqlx-cli:
-```bash
-cargo install sqlx-cli
-```
-
-* Run database migrations in sqlx-cli:
-```bash
-sqlx mig run
-```
-
 * Build the source code.
 ```bash
 cargo build --release
@@ -55,7 +45,8 @@ cargo build --release
 * Edit the newly created config.toml file according to your liking. Eg:
 ```toml
 bind_address = "0.0.0.0:3000"
-on_reverse_proxy = true
+db_url = "sqlite://data.db?mode=rwc"
+on_reverse_proxy = false
 
 [master_server]
 enabled = true
@@ -119,6 +110,3 @@ JMeter Benchmarks (empty /list endpoint): Concurrent requests per second = avera
 |      10000      |   2   |    1000+ (died on 5000 requests)   |
 
 As you can see here, the Rust based master server performs significantly better than the NodeJS based master server under heavy load.
-
-## Credits
-🍺

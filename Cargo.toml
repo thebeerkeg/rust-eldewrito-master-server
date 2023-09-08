@@ -11,5 +11,7 @@ serde = { version = "1.0.130", features = ["derive"] }
 rustls = "0.20.0"
 reqwest = { version = "0.11.6", features = ["blocking", "json"] }
 config = "0.11"
-sqlx = { version = "0.5.7", features = [ "runtime-actix-rustls", "sqlite", "migrate", "time" ] }
+sqlx = { version = "0.5.7", features = [ "runtime-actix-rustls", "sqlite", "mysql", "migrate", "time" ] }
 toml = "0.5.8"
+log = "0.4"
+async-trait = "0.1.73"

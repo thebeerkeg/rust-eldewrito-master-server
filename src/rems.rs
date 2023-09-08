@@ -1,39 +1,39 @@
 use std::sync::Mutex;
-use crate::{master_server, RemsConfig};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::time::SystemTime;
+
+use crate::master_server;
 use crate::ranking_server::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
-use sqlx;
-use sqlx::SqlitePool;
-use sqlx::sqlite::SqlitePoolOptions;
-use crate::common::{IpWrapper, PlayerInfo, ServerInfo};
+use crate::common::{IpWrapper, ServerInfo};
+use crate::config::{DbDriver, RemsConfig};
+use crate::database::Database;
+use crate::database::mysql::MySQLDatabase;
+use crate::database::sqlite::SQLiteDatabase;
 use crate::master_server::announce::AnnounceRequest;
 use crate::ranking_server::submit::{Game, Player, SubmitRequest};
 
-#[derive(Debug)]
 pub struct Rems {
     cfg: RemsConfig,
     server_list: Mutex<HashMap<String, SystemTime>>,
     server_list_last_updated: Mutex<SystemTime>,
-    pool: SqlitePool
+    database: Box<dyn Database>
 }
 
 impl Rems {
     pub async fn new(cfg: RemsConfig) -> Self {
-        let pool = SqlitePoolOptions::new()
-            .connect("sqlite://data.db?mode=rwc")
-            .await
-            .expect("Unable to create database pool.");
-
-        sqlx::migrate!().run(&pool).await.expect("Could not run database migrations.");
+        let database: Box<dyn Database> = match cfg.get_db_driver() {
+            DbDriver::SQLite => Box::new(SQLiteDatabase::new(&cfg.db_url).await),
+            DbDriver::MySQL => Box::new(MySQLDatabase::new(&cfg.db_url).await),
+            _ => panic!("Unknown database driver.")
+        };
 
         Self {
             cfg,
             server_list: Mutex::new(HashMap::new()),
             server_list_last_updated: Mutex::new(SystemTime::now()),
-            pool
+            database
         }
     }
 
@@ -103,15 +103,7 @@ impl Rems {
         let mut re_list = RankEmblemList::new();
 
         for (index, player) in stats_request.players.iter().enumerate() {
-            let res: Result<PlayerInfo, sqlx::Error> = sqlx::query_as!(
-                PlayerInfo,
-                r#"SELECT name, service_tag, primary_color, IFNULL((SELECT SUM(exp) FROM game_player_results WHERE uid = $1), 0) as experience
-                   FROM player_infos pi WHERE uid = $1
-                "#,
-                player.uid
-            )
-                .fetch_one(&self.pool)
-                .await;
+            let res = self.database.get_player_info(&player.uid).await;
 
             if let Ok(player_info) = res {
                 // don't want to have an integer overflow
@@ -137,103 +129,31 @@ impl Rems {
     }
 
     pub async fn insert_team_scores(&self, game_id: i64, scores: &Vec<i64>) -> Result<(), ()> {
-        let _res = sqlx::query!(
-            r#"INSERT INTO game_team_results (game_id, one, two, three, four, five, six, seven, eight)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"#,
-            game_id,
-            scores[0],
-            scores[1],
-            scores[2],
-            scores[3],
-            scores[4],
-            scores[5],
-            scores[6],
-            scores[7]
-        )
-            .execute(&self.pool)
-            .await.map_err(|_| ())?;
-
-        Ok(())
+        self.database.insert_team_scores(game_id, scores).await
     }
 
-    pub async fn insert_game_and_get_id(&self, game_version: &str, server_name: &str, host_player: &str, game: &Game) -> Result<i64, ()> {
-        let res = sqlx::query!(
-            r#"INSERT INTO games (game_version, server_name, host_player, map_name, map_file, variant, variant_type, team_game)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING id as "game_id: i64""#,
-            game_version,
-            server_name,
-            host_player,
-            game.map_name,
-            game.map_file,
-            game.variant,
-            game.variant_type,
-            game.team_game
-        )
-            .fetch_one(&self.pool)
-            .await.map_err(|_| ())?;
+    pub async fn insert_game_and_get_id(&self, game_version: &str, server_name: &str, server_ip: &str, server_port: &str, host_player: &str, game: &Game) -> Result<i64, ()> {
+        let game_id = self.database.insert_game_and_get_id(game_version, server_name, server_ip, server_port, host_player, game).await?;
 
         if game.team_game {
-            let _ = self.insert_team_scores(res.game_id, game.team_scores.as_ref().unwrap()).await;
+            let _ = self.insert_team_scores(game_id, game.team_scores.as_ref().unwrap()).await;
         }
 
-        Ok(res.game_id)
+        Ok(game_id)
     }
 
     pub async fn insert_player(&self, uid: &str) -> Result<String, ()> {
-        let _res = sqlx::query!(
-            r#"INSERT OR IGNORE INTO players (uid)
-            VALUES ($1)"#,
-            uid
-        )
-            .execute(&self.pool)
-            .await.map_err(|_| ())?;
-
-        // can't fail
-        Ok(uid.to_string())
+        self.database.insert_player(uid).await
     }
 
     pub async fn insert_player_info(&self, player: &Player) -> Result<(), ()> {
-        let uid = self.insert_player(&player.uid).await?;
+        let _uid = self.insert_player(&player.uid).await?;
 
-        let _res = sqlx::query!(
-            r#"INSERT INTO player_infos (uid, ip, client_name, name, service_tag, primary_color)
-            VALUES ($1, $2, $3, $4, $5, $6)"#,
-            uid,
-            player.ip,
-            player.client_name,
-            player.name,
-            player.service_tag,
-            player.primary_color
-        )
-            .execute(&self.pool)
-            .await.map_err(|_| ())?;
-
-        Ok(())
+        self.database.insert_player_info(player).await
     }
 
     pub async fn insert_game_player_result(&self, game_id: i64, player: &Player, exp: u32) -> Result<(), ()> {
-        let _res = sqlx::query!(
-            r#"INSERT INTO game_player_results (game_id, uid, team, player_index, score, kills, assists, deaths, betrayals, time_spent_alive, suicides, best_streak, exp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)"#,
-            game_id,
-            player.uid,
-            player.team,
-            player.player_index,
-            player.player_game_stats.score,
-            player.player_game_stats.kills,
-            player.player_game_stats.assists,
-            player.player_game_stats.deaths,
-            player.player_game_stats.betrayals,
-            player.player_game_stats.time_spent_alive,
-            player.player_game_stats.suicides,
-            player.player_game_stats.best_streak,
-            exp
-        )
-            .execute(&self.pool)
-            .await.map_err(|_| ())?;
-
-        Ok(())
+        self.database.insert_game_player_result(game_id, player, exp).await
     }
 
     pub fn calc_base_player_exp_from_game_result(&self, player: &Player) -> u32 {
@@ -264,10 +184,11 @@ impl Rems {
             }
         }
 
-        // todo: add server ip + port
         let game_id = self.insert_game_and_get_id(
             &submit_request.game_version,
             &submit_request.server_name,
+            &ip.to_string(),
+            &submit_request.server_port.to_string(),
             &submit_request.host_player,
             &submit_request.game
         ).await.map_err(|_| "Internal server error.".to_string())?;
