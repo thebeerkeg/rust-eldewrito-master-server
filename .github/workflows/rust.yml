@@ -4,39 +4,29 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  release:
     if: |
       github.event_name == 'push' &&
       github.event.base_ref == 'refs/heads/main' &&
       startsWith(github.ref, 'refs/tags/v')
+    name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-gnu
+            archive: zip
+          - target: x86_64-unknown-linux-musl
+            archive: tar.gz tar.xz tar.zst
+          - target: x86_64-apple-darwin
+            archive: zip
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@v1.4.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          profile: minimal
-          toolchain: stable
-      - uses: Swatinem/rust-cache@v1
-      - name: Build REMS
-        run: cargo build --release
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: rems
-          path: ./target/release/rust-eldewrito-master-server
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: rems
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            rems
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
