@@ -4,10 +4,10 @@ mod config;
 mod common;
 mod ranking_server;
 mod master_server;
-mod torrent_tracker;
 
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use rems::Rems;
+
 use crate::config::RemsConfig;
 
 #[get("/")]

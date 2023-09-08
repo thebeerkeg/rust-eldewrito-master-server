@@ -118,7 +118,7 @@ JMeter Benchmarks (empty /list endpoint): Concurrent requests per second = avera
 |      2000      |   2   |    100-400    |
 |      10000      |   2   |    1000+ (died on 5000 requests)   |
 
-As you can see here, the Rust based master server performs significantly better than the NodeJS based master server under heavy load. Not that it matters.
+As you can see here, the Rust based master server performs significantly better than the NodeJS based master server under heavy load.
 
 ## Credits
 🍺
