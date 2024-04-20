@@ -3,7 +3,9 @@ name = "rust-eldewrito-master-server"
 version = "1.0.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "rust-eldewrito-master-server"
+path = "src/main.rs"
 
 [dependencies]
 actix-web = { version = "4.5.1", features=["rustls"] }
