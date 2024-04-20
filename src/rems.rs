@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::master_server;
 use crate::ranking_server::stats::{PlayerEntry, RankEmblemList, StatsRequest};
 use crate::utils::http_client;
-use crate::common::{IpWrapper, ServerInfo};
+use crate::common::{ServerInfoCompact, IpWrapper};
 use crate::config::{DbDriver, RemsConfig};
 use crate::database::Database;
 use crate::database::mysql::MySQLDatabase;
@@ -67,7 +67,7 @@ impl Rems {
         }
 
         // request server info
-        let server_info_result = http_client::get::<ServerInfo>(format!("http://{}/", server_address)).await;
+        let server_info_result = http_client::get::<ServerInfoCompact>(format!("http://{}/", server_address)).await;
 
         if server_info_result.is_err() {
             return Err("Failed to retrieve server info.".to_string())
@@ -217,34 +217,4 @@ impl Rems {
 
         Ok(())
     }
-
-    // todo: halostats dead, fix when halostats alive again
-    // EXPECTS RESPONSE:
-    //
-    // {
-    //     "0": {
-    //         "r": 3,
-    //         "e": ""
-    //     },
-    //     "1": {
-    //         "r": 0,
-    //         "e": ""
-    //     },
-    //     ...
-    // }
-    // pub async fn get_stats_from_endpoint(&self, stats_request: &StatsRequest) -> Result<Vec<PlayerEntry>, ()> {
-    //     let client = reqwest::Client::new();
-    //     let res = client.post("http://halostats.click/api/playersinfo")
-    //         .header(CONTENT_TYPE, "application/json")
-    //         .header(USER_AGENT, "Eldewrito/0.6.1")
-    //         .json(stats_request)
-    //         .send().await;
-    //
-    //     match res {
-    //         Ok(o) => { println!("{:?}", o) }
-    //         Err(e) => { println!("{:?}", e) }
-    //     }
-    //
-    //     Ok(())
-    // }
 }

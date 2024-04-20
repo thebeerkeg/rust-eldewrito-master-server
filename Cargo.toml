@@ -1,17 +1,18 @@
 [package]
 name = "rust-eldewrito-master-server"
-version = "1.0.0"
-edition = "2018"
+version = "1.0.1"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-web = { version = "4.0.0-rc.1", features=["rustls"] }
+actix-web = { version = "4.5.1", features=["rustls"] }
 serde = { version = "1.0.130", features = ["derive"] }
-rustls = "0.20.0"
-reqwest = { version = "0.11.6", features = ["blocking", "json"] }
+rustls = "0.23.5"
+reqwest = { version = "0.12.4", features = ["blocking", "json"] }
 config = "0.11"
-sqlx = { version = "0.5.7", features = [ "runtime-actix-rustls", "sqlite", "mysql", "migrate", "time" ] }
-toml = "0.5.8"
+sqlx = { version = "0.7.4", features = [ "runtime-async-std-rustls", "sqlite", "mysql", "migrate", "time" ] }
+toml = "0.8.12"
 log = "0.4"
 async-trait = "0.1.73"
+lazy_static = "1.4.0"

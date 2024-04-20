@@ -27,6 +27,7 @@ pub struct Result {
 pub async fn announce(request: web::Query<AnnounceRequest>, req: HttpRequest, rems: web::Data<Rems>) -> impl Responder {
     let announce_request = request.into_inner();
     let ip_wrapper = IpWrapper::from_req(&req);
+
     match rems.handle_announce(&announce_request, &ip_wrapper).await {
         Ok(v) => {
             HttpResponse::Ok().json(Response {

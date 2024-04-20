@@ -5,27 +5,11 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ServerInfo {
+pub struct ServerInfoCompact {
     pub name: String,
     pub port: i64,
-    pub host_player: String,
-    pub sprint_enabled: String,
-    pub sprint_unlimited_enabled: String,
-    pub dual_wielding: String,
-    pub assassination_enabled: String,
-    pub voting_enabled: bool,
-    pub teams: bool,
-    pub map: String,
-    pub map_file: String,
-    pub variant: String,
-    pub variant_type: String,
-    pub status: String,
-    pub num_players: u8,
-    pub mods: Vec<String>,
-    pub max_players: u8,
-    pub xnkid: String,
-    pub xnaddr: String,
-    pub players: Vec<Player>,
+    #[serde(default)]
+    pub passworded: bool,
     pub is_dedicated: bool,
     pub game_version: String,
     pub eldewrito_version: String,

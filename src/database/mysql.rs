@@ -15,9 +15,10 @@ pub struct MySQLDatabase {
 
 impl MySQLDatabase {
     pub async fn new(db_url: &str) -> Self {
-        let mut connection_options = MySqlConnectOptions::from_str(db_url).expect("Unable to create connection options.");
+        let connection_options = MySqlConnectOptions::from_str(db_url).expect("Unable to create connection options.");
 
         connection_options
+            .clone()
             .log_statements(log::LevelFilter::Error)
             .log_slow_statements(log::LevelFilter::Warn, Duration::from_secs(1));
 
