@@ -8,8 +8,6 @@ use serde::{Serialize, Deserialize};
 pub struct ServerInfoCompact {
     pub name: String,
     pub port: i64,
-    #[serde(default)]
-    pub passworded: bool,
     pub is_dedicated: bool,
     pub game_version: String,
     pub eldewrito_version: String,
