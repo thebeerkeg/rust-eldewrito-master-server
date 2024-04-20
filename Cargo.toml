@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 actix-web = { version = "4.5.1", features=["rustls"] }
 serde = { version = "1.0.130", features = ["derive"] }
-rustls = "0.23.5"
+rustls = "0.20.0"
 reqwest = { version = "0.12.4", features = ["blocking", "json"] }
 config = "0.11"
 sqlx = { version = "0.7.4", features = [ "runtime-async-std-rustls", "sqlite", "mysql", "migrate", "time" ] }
