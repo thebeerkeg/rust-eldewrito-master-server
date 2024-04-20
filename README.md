@@ -12,10 +12,10 @@ REMS is a Master Server and Ranking Server for the popular Halo Online mod calle
 * [ ] Custom Emblems- *todo*
 * [X] Amazing performance thanks to Rust!
 
-## How To Install (Download Binaries)
+## How To Install (Using Compiled Binaries)
 Download the latest binaries from the [releases](https://github.com/thebeerkeg/rust-eldewrito-master-server/releases).
 
-## How To Install (Build Manually)
+## How To Install (Compile Manually)
 ### Install Prerequisites
 * Git: ```sudo apt-get install git```
 * cURL: ```sudo apt-get install curl```
