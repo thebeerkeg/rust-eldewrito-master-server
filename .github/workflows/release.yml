@@ -6,7 +6,7 @@ jobs:
   build:
     if: |
       github.event_name == 'push' &&
-      github.event.base_ref == 'refs/heads/main' &&
+      github.event.base_ref == 'refs/heads/main' || github.event.base_ref == 'refs/heads/workflow' &&
       startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     env:
