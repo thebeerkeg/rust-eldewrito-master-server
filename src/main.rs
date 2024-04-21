@@ -28,11 +28,9 @@ async fn main() -> std::io::Result<()> {
     println!("Started REMS on: {}", bind_address);
 
     HttpServer::new(move || {
-        let mut app = App::new().app_data(db.clone());
-
         let cors = Cors::default().allow_any_origin().send_wildcard();
 
-        app = app.wrap(cors);
+        let mut app = App::new().app_data(db.clone()).wrap(cors);
 
         if master_server_enabled {
             app = app.service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
