@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use rust_eldewrito_master_server::config::RemsConfig;
 use rust_eldewrito_master_server::{master_server, ranking_server};
@@ -28,6 +29,10 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let mut app = App::new().app_data(db.clone());
+
+        let cors = Cors::default().allow_any_origin().send_wildcard();
+
+        app = app.wrap(cors);
 
         if master_server_enabled {
             app = app.service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))

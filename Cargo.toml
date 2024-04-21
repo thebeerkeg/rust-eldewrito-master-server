@@ -1,6 +1,6 @@
 [package]
 name = "rust-eldewrito-master-server"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 
 [[bin]]
@@ -9,6 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 actix-web = { version = "4.5.1", features=["rustls"] }
+actix-cors = "0.7.0"
 serde = { version = "1.0.130", features = ["derive"] }
 rustls = "0.20.0"
 reqwest = { version = "0.12.4", features = ["blocking", "json"] }
