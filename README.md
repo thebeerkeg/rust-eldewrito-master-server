@@ -5,18 +5,19 @@ REMS is a Master Server and Ranking Server for the popular Halo Online mod calle
 
 ### Features
 * [X] Master Server
-* [X] Ranking Server
+* [X] Ranking Server (Only supports 0.6.x for now!)
 * [X] Works behind reverse proxy
 * [X] Configurable Endpoint Paths (Eg: /stats -> /playerinfo)
 * [X] Custom Rank & Exp Logic
 * [ ] Custom Emblems- *todo*
 * [X] Amazing performance thanks to Rust!
 
-## How To Install (Using Compiled Binaries)
+## Install REMS
+
+### Download Binaries
 Download the latest binaries from the [releases](https://github.com/thebeerkeg/rust-eldewrito-master-server/releases).
 
-## How To Install (Compile Manually)
-### Install Prerequisites
+### Or Build Manually
 * Git: ```sudo apt-get install git```
 * cURL: ```sudo apt-get install curl```
 * Rust/Cargo:
@@ -27,7 +28,6 @@ Download the latest binaries from the [releases](https://github.com/thebeerkeg/r
     * for Arch Linux: ```sudo pacman -S base-devel```
     * for Debian/Ubuntu: ```sudo apt install build-essential```
 
-### Install REMS
 * Clone the repo.
 ```bash
 git clone https://github.com/thebeerkeg/rust-eldewrito-master-server.git
