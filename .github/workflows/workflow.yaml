@@ -53,7 +53,7 @@ jobs:
             bin: rust-eldewrito-master-server.exe
             name: rust-eldewrito-master-server-Windows-x86_64.zip
         toolchain:
-          - stable
+          - nightly
     steps:
       - uses: actions/checkout@v4
       - name: Cache cargo & target directories
@@ -84,7 +84,7 @@ jobs:
           fi
           cd -
         if: |
-          matrix.toolchain == 'stable' &&
+          matrix.toolchain == 'nightly' &&
           ( startsWith( github.ref, 'refs/tags/v' ) ||
             github.ref == 'refs/tags/test-release' )
       - name: Publish release artifacts
@@ -92,11 +92,11 @@ jobs:
         with:
           name: rust-eldewrito-master-server-${{ matrix.platform.os_name }}
           path: "rust-eldewrito-master-server-*"
-        if: matrix.toolchain == 'stable' && github.ref == 'refs/tags/test-release'
+        if: matrix.toolchain == 'nightly' && github.ref == 'refs/tags/test-release'
       - name: Generate SHA-256
         run: shasum -a 256 ${{ matrix.platform.name }}
         if: |
-          matrix.toolchain == 'stable' &&
+          matrix.toolchain == 'nightly' &&
           matrix.platform.os == 'macOS-latest' &&
           ( startsWith( github.ref, 'refs/tags/v' ) ||
             github.ref == 'refs/tags/test-release' )
@@ -106,4 +106,4 @@ jobs:
           draft: true
           files: "rust-eldewrito-master-server-*"
           body_path: Changes.md
-        if: matrix.toolchain == 'stable' && startsWith( github.ref, 'refs/tags/v' )
+        if: matrix.toolchain == 'nightly' && startsWith( github.ref, 'refs/tags/v' )
