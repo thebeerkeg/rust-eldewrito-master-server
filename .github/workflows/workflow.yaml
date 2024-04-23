@@ -71,7 +71,7 @@ jobs:
           command: "build"
           target: ${{ matrix.platform.target }}
           toolchain: ${{ matrix.toolchain }}
-          args: "--locked --release"
+          args: "--release"
           strip: true
       - name: Package as archive
         shell: bash
