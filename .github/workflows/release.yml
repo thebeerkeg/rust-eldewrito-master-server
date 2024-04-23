@@ -6,8 +6,8 @@ jobs:
   build:
     if: |
       github.event_name == 'push' &&
-      (github.event.base_ref == 'refs/heads/main' || github.event.base_ref == 'refs/heads/workflow') &&
-      startsWith(github.ref, 'refs/tags/v')
+      ((github.event.base_ref == 'refs/heads/main' && startsWith(github.ref, 'refs/tags/v')) ||
+      github.event.base_ref == 'refs/heads/workflow')
     runs-on: ubuntu-latest
     env:
       CARGO_TERM_COLOR: always
@@ -34,8 +34,16 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: rust-eldewrito-master-server
+      - name: Check if tag exists
+        id: check_tag
+        run: echo ::set-output name=tag_exists::$(if [ -n "$GITHUB_REF" ]; then echo true; else echo false; fi)
+      - name: Set default tag if not provided
+        id: set_tag
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: echo ::set-output name=tag::'wftest'
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.set_tag.outputs.tag }}
           files: |
             rust-eldewrito-master-server
