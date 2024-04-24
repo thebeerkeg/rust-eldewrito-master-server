@@ -47,6 +47,7 @@ cargo build --release
 
 * Edit the newly created config.toml file according to your liking. Eg:
 ```toml
+log_level = "info" #off/error/warn/info/debug/trace
 bind_address = "0.0.0.0:3000"
 db_url = "sqlite://data.db?mode=rwc"
 on_reverse_proxy = false

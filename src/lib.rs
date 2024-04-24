@@ -5,3 +5,4 @@ pub mod common;
 pub mod database;
 pub mod ranking_server;
 pub mod master_server;
+pub mod logging;

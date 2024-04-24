@@ -40,6 +40,7 @@ pub enum DbDriver {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RemsConfig {
+    pub log_level: Option<String>,
     pub bind_address: SocketAddr,
     pub db_url: String,
     pub on_reverse_proxy: bool,
@@ -51,6 +52,7 @@ impl RemsConfig {
     /// Default config
     pub fn default() -> Self {
         RemsConfig {
+            log_level: Some("info".to_string()),
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
             db_url: "sqlite://data.db?mode=rwc".to_string(),
             on_reverse_proxy: false,

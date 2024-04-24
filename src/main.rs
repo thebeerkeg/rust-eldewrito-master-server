@@ -1,7 +1,8 @@
 use actix_cors::Cors;
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
+use actix_web::middleware::Logger;
 use rust_eldewrito_master_server::config::RemsConfig;
-use rust_eldewrito_master_server::{master_server, ranking_server};
+use rust_eldewrito_master_server::{logging, master_server, ranking_server};
 use rust_eldewrito_master_server::rems::Rems;
 
 #[get("/")]
@@ -23,23 +24,42 @@ async fn main() -> std::io::Result<()> {
 
     if !(master_server_enabled || ranking_server_enabled) { panic!("Master server and ranking server are disabled.") }
 
+    logging::setup(&cfg.log_level);
+
     let db = web::Data::new(Rems::new(cfg).await);
 
     println!("Started REMS on: {}", bind_address);
 
     HttpServer::new(move || {
-        let cors = Cors::default().allow_any_origin().send_wildcard();
+        let logger = Logger::default();
 
-        let mut app = App::new().app_data(db.clone()).wrap(cors);
+        let cors = Cors::default()
+            .allow_any_origin()
+            .send_wildcard();
+
+        let mut app = App::new()
+            .app_data(db.clone())
+            .wrap(logger)
+            .wrap(cors);
 
         if master_server_enabled {
-            app = app.service(web::resource(&announce_endpoint).route(web::get().to(master_server::announce::announce)))
-                .service(web::resource(&list_endpoint).route(web::get().to(master_server::list::list)));
+            app = app
+                .service(web::resource(&announce_endpoint)
+                    .route(web::get()
+                        .to(master_server::announce::announce)))
+                .service(web::resource(&list_endpoint)
+                    .route(web::get()
+                        .to(master_server::list::list)));
         }
 
         if ranking_server_enabled {
-            app = app.service(web::resource(&submit_endpoint).route(web::post().to(ranking_server::submit::submit)))
-                .service(web::resource(&stats_endpoint).route(web::post().to(ranking_server::stats::stats)));
+            app = app
+                .service(web::resource(&submit_endpoint)
+                    .route(web::post()
+                        .to(ranking_server::submit::submit)))
+                .service(web::resource(&stats_endpoint)
+                    .route(web::post()
+                        .to(ranking_server::stats::stats)));
         }
 
         app.service(index)
