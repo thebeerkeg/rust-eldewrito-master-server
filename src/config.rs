@@ -1,5 +1,5 @@
 use std::fs;
-use std::net::{IpAddr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use config::{ConfigError, Config, File};
 use std::path::Path;
 use std::str::FromStr;
@@ -42,6 +42,7 @@ pub enum DbDriver {
 pub struct RemsConfig {
     pub log_level: Option<String>,
     pub bind_address: SocketAddr,
+    pub external_address: Option<Ipv4Addr>,
     pub db_url: String,
     pub on_reverse_proxy: bool,
     pub master_server: MasterServer,
@@ -54,6 +55,7 @@ impl RemsConfig {
         RemsConfig {
             log_level: Some("info".to_string()),
             bind_address: SocketAddr::from_str("0.0.0.0:3000").unwrap(),
+            external_address: None,
             db_url: "sqlite://data.db?mode=rwc".to_string(),
             on_reverse_proxy: false,
             master_server: MasterServer {

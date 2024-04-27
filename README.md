@@ -49,6 +49,7 @@ cargo build --release
 ```toml
 log_level = "info" #off/error/warn/info/debug/trace
 bind_address = "0.0.0.0:3000"
+external_address = "148.251.256.200" #set this if you have local servers
 db_url = "sqlite://data.db?mode=rwc"
 on_reverse_proxy = false
 
