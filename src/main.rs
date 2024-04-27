@@ -1,3 +1,5 @@
+#![feature(ip)]
+
 use actix_cors::Cors;
 use actix_web::{App, get, HttpResponse, HttpServer, Responder, web};
 use actix_web::middleware::Logger;
@@ -23,6 +25,12 @@ async fn main() -> std::io::Result<()> {
     let ranking_server_enabled = cfg.ranking_server.enabled;
 
     if !(master_server_enabled || ranking_server_enabled) { panic!("Master server and ranking server are disabled.") }
+
+    if let Some(external_address) = cfg.external_address {
+        if !external_address.is_global() {
+            panic!("external_address is not global!")
+        }
+    }
 
     logging::setup(&cfg.log_level);
 

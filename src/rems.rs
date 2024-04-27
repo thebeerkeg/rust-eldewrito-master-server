@@ -42,6 +42,7 @@ impl Rems {
     }
 
     // will return forwarded ip if running behind reserve proxy
+    // or external ip if announced ip is local
     pub fn get_real_ip(&self, ip_wrapper: &IpWrapper) -> Result<IpAddr, String> {
         if self.cfg.on_reverse_proxy && ip_wrapper.forwarded_opt_ip.is_none() {
             return Err("Reverse proxy did not forward ip.".to_string())
@@ -50,10 +51,20 @@ impl Rems {
         }
 
         // can not fail because of prior verifications
-        match self.cfg.on_reverse_proxy {
-            true => Ok(ip_wrapper.forwarded_opt_ip.unwrap()),
-            false => Ok(ip_wrapper.real_opt_ip.unwrap())
+        let mut ip = match self.cfg.on_reverse_proxy {
+            true => ip_wrapper.forwarded_opt_ip.unwrap(),
+            false => ip_wrapper.real_opt_ip.unwrap()
+        };
+
+        if !ip.is_global() {
+            if let Some(external_ip) = self.cfg.external_address {
+                ip = IpAddr::from(external_ip);
+            } else {
+                return Err("Can't list local ip.".to_string())
+            }
         }
+
+        Ok(ip)
     }
 
     pub async fn handle_announce(&self, announce_request: &AnnounceRequest, ip_wrapper: &IpWrapper) -> Result<String, String> {

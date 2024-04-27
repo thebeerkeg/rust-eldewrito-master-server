@@ -1,6 +1,6 @@
 [package]
 name = "rust-eldewrito-master-server"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
 
 [[bin]]
